@@ -1,39 +1,16 @@
-# Pl::Utils
+# pl-utils: *nix command-line utilities for working with PrairieLearn content
 
-Welcome to your new gem! In this directory, you'll find the files you need to be able to package up your Ruby library into a gem. Put your Ruby code in the file `lib/pl/utils`. To experiment with that code, run `bin/console` for an interactive prompt.
+These require Ruby 2 or 3 to be installed.
 
-TODO: Delete this and the text above, and describe your gem
+`pl-tag {add|remove|set} tag1,tag2,tag3 file1.json file2.json`
 
-## Installation
+Add, remove, or set `tags` field in each JSON file (usually the
+`info.json` associated with a question), which is overwritten in
+place.  Files with errors are skipped.  If a tag to be added already
+exists in the file, it is not duplicated.  If a tag to be removed
+doesn't already exist, it's fine.
 
-Add this line to your application's Gemfile:
+To do it to lots of files, try `find . `_(conditions for find)_`|xargs pl-tag add foobar`
 
-```ruby
-gem 'pl-utils'
-```
+**Warning:** Files are overwritten in place!  Be careful/do a git commit first!
 
-And then execute:
-
-    $ bundle
-
-Or install it yourself as:
-
-    $ gem install pl-utils
-
-## Usage
-
-TODO: Write usage instructions here
-
-## Development
-
-After checking out the repo, run `bin/setup` to install dependencies. Then, run `rake spec` to run the tests. You can also run `bin/console` for an interactive prompt that will allow you to experiment.
-
-To install this gem onto your local machine, run `bundle exec rake install`. To release a new version, update the version number in `version.rb`, and then run `bundle exec rake release`, which will create a git tag for the version, push git commits and tags, and push the `.gem` file to [rubygems.org](https://rubygems.org).
-
-## Contributing
-
-Bug reports and pull requests are welcome on GitHub at https://github.com/[USERNAME]/pl-utils. This project is intended to be a safe, welcoming space for collaboration, and contributors are expected to adhere to the [Contributor Covenant](http://contributor-covenant.org) code of conduct.
-
-## Code of Conduct
-
-Everyone interacting in the Pl::Utils project’s codebases, issue trackers, chat rooms and mailing lists is expected to follow the [code of conduct](https://github.com/[USERNAME]/pl-utils/blob/master/CODE_OF_CONDUCT.md).
