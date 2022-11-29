@@ -1,9 +1,10 @@
 #!/usr/bin/env ruby
 
+require 'byebug'
 require 'json'
 require 'getoptlong'
 require 'securerandom'
-
+require 'fileutils'
 
 def usage
   STDERR.puts <<eos1
@@ -23,7 +24,7 @@ class PlNew
     @dirname = argv.pop or usage
     @opts = {
       uuid: SecureRandom.uuid,
-      title: File.basename @dirname,
+      title: File.basename(@dirname),
       tags: [],
       topic: 'none',
       type: 'v3',
@@ -33,10 +34,11 @@ class PlNew
   
   def get_options
     GetoptLong.new(
-      [['--force', '-f', GetoptLong::NO_ARGUMENT],
-       ['--title', '-n', GetoptLong::REQUIRED_ARGUMENT],
-       ['--tags', '-t',  GetoptLong::REQUIRED_ARGUMENT],
-       ['--topic', '-T',  GetoptLong::REQUIRED_ARGUMENT]]).each do |opt,arg|
+      ['--force', '-f', GetoptLong::NO_ARGUMENT],
+      ['--title', '-n', GetoptLong::REQUIRED_ARGUMENT],
+      ['--tags', '-t',  GetoptLong::REQUIRED_ARGUMENT],
+      ['--topic', '-T',  GetoptLong::REQUIRED_ARGUMENT]).
+      each do |opt,arg|
       case opt
       when '--help' then usage
       when '--force' then @force = true
@@ -48,14 +50,15 @@ class PlNew
   end
 
   def run
+    get_options
     FileUtils.makedirs(@dirname) unless Dir.exist?(@dirname)
-    infojson = File.join(dirname, 'info.json')
+    infojson = File.join(@dirname, 'info.json')
     if File.exist?(infojson) && !@force
       STDERR.puts "#{@dirname}/info.json exists, use --force or -f to overwrite"
       exit false
     end
     File.open(infojson, 'w') do |f|
-      f.puts JSON.pretty_generate(opts)
+      f.puts JSON.pretty_generate(@opts)
     end
   end
 end
