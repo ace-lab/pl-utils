@@ -1,6 +1,7 @@
 # pl-utils: *nix command-line utilities for working with PrairieLearn content
 
-These require Ruby 2 or 3 to be installed.
+These require Ruby 2 or 3 to be installed.  Saying `gem install
+pl-utils` will get you the following executables:
 
 `pl-tag {add|remove|set} tag1,tag2,tag3 file1.json file2.json`
 

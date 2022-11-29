@@ -1,0 +1,29 @@
+#!/usr/bin/env ruby 
+require 'json'
+def main
+  action = ARGV.shift
+  tags = ARGV.shift.split(/,/)
+  ARGV.each do |file|
+    begin
+      json = JSON.load(IO.read file)
+    rescue Exception => e
+      STDERR.puts "skipping #{file}: #{e.message}"
+      next
+    end
+    case action
+    when 'add' then json['tags'] |= tags
+    when 'remove' then json['tags'] -= tags
+    when 'set' then json['tags'] = tags
+    else  raise "Usage: pl-tag {add|remove|set} tag1,tag2,tag3 filename.json (file is overwritten in place)" 
+    end
+    begin
+      File.open(file,"w") do |f|
+        f.puts JSON.pretty_generate(json)
+      end
+    rescue Exception => e
+      STDERR.puts "not writing #{file}, cannot write/dump"
+    end
+  end
+end
+
+main()

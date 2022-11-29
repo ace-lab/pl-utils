@@ -1,0 +1,42 @@
+#!/usr/bin/env ruby
+
+require 'json'
+require 'getoptlong'
+require 'securerandom'
+
+
+def usage
+  STDERR.puts <<eos1
+Usage: #{File.basename $0} [--topic=topic] [--tags=tag1,tag2] [--title=title] [--force] questiondir
+   or #{File.basename $0} [-T topic] [-t tag1,tag2] [-n title] [-f] questiondir
+
+Create questiondir/info.json (--force means overwrite if exists) with a random uuid,
+the given topic (default="none"), the given tags (default=no tags), and the given question
+title (defaults to same as last pathname component of questiondir).
+eos1
+  exit false
+end
+
+def main
+  dirname = ARGV.pop || usage
+  opts = {
+    uuid: SecureRandom.uuid,
+    title: nil,
+    tags: [],
+    topic: 'none',
+    type: 'v3',
+    force: false,
+  }.merge(get_options)
+  
+  Dir.makedirs(dirname) unless Dir.exist?(dirname)
+  infojson = File.join(dirname, 'info.json')
+  if File.exist?(infojson) && !opts[:force]
+    STDERR.puts "#{dirname}/info.json exists, use --force or -f to overwrite"
+    exit false
+  end
+  opts.delete(:force)
+  File.open(infojson, 'w') do |f|
+    f.puts JSON.pretty_generate(opts)
+  end
+end
+  
