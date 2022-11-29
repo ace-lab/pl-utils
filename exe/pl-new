@@ -17,6 +17,10 @@ eos1
   exit false
 end
 
+def get_options
+  
+                          
+
 def main
   dirname = ARGV.pop || usage
   opts = {
@@ -26,9 +30,13 @@ def main
     topic: 'none',
     type: 'v3',
     force: false,
-  }.merge(get_options)
-  
-  Dir.makedirs(dirname) unless Dir.exist?(dirname)
+  }.merge(GetoptLong.new(
+    [['-f', '--force', GetoptLong::NO_ARGUMENT],
+     ['-n', '--title', GetoptLong::REQUIRED_ARGUMENT],
+     ['-t', '--tags',  GetoptLong::REQUIRED_ARGUMENT],
+     ['-T', '--topic',  GetoptLong::REQUIRED_ARGUMENT]]))
+  opts[:title] ||= File.basename(dirname)
+  FileUtils.makedirs(dirname) unless Dir.exist?(dirname)
   infojson = File.join(dirname, 'info.json')
   if File.exist?(infojson) && !opts[:force]
     STDERR.puts "#{dirname}/info.json exists, use --force or -f to overwrite"
