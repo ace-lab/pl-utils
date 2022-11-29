@@ -5,7 +5,7 @@ require "pl/utils/version"
 
 Gem::Specification.new do |spec|
   spec.name          = "pl-utils"
-  spec.version       = '0.0.2'
+  spec.version       = '0.0.1'
   spec.authors       = ["Armando Fox"]
   spec.email         = ["fox@berkeley.edu"]
 
