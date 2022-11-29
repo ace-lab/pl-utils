@@ -52,12 +52,18 @@ class PlNew
     get_options
     FileUtils.makedirs(@dirname) unless Dir.exist?(@dirname)
     infojson = File.join(@dirname, 'info.json')
-    if File.exist?(infojson) && !@force
-      STDERR.puts "#{@dirname}/info.json exists, use --force or -f to overwrite"
-      exit false
+    qhtml = File.join(@dirname, 'question.html')
+    [infojson,qhtml].each do |file|
+      if File.exist?(file) && !@force
+        STDERR.puts "#{file} exists, use --force or -f to overwrite"
+        exit false
+      end
     end
     File.open(infojson, 'w') do |f|
       f.puts JSON.pretty_generate(@opts)
+    end
+    File.open(qhtml, 'w') do |f|
+      f.puts "<pl-question-panel>\n\n</pl-question-panel>\n"
     end
   end
 end
