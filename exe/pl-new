@@ -17,31 +17,47 @@ eos1
   exit false
 end
 
-def main
-  dirname = ARGV.pop || usage
-  opts = {
-    uuid: SecureRandom.uuid,
-    title: nil,
-    tags: [],
-    topic: 'none',
-    type: 'v3',
-    force: false,
-  }.merge(GetoptLong.new(
-    [['-f', '--force', GetoptLong::NO_ARGUMENT],
-     ['-n', '--title', GetoptLong::REQUIRED_ARGUMENT],
-     ['-t', '--tags',  GetoptLong::REQUIRED_ARGUMENT],
-     ['-T', '--topic',  GetoptLong::REQUIRED_ARGUMENT]]))
-  opts[:title] ||= File.basename(dirname)
-  FileUtils.makedirs(dirname) unless Dir.exist?(dirname)
-  infojson = File.join(dirname, 'info.json')
-  if File.exist?(infojson) && !opts[:force]
-    STDERR.puts "#{dirname}/info.json exists, use --force or -f to overwrite"
-    exit false
+class PlNew
+  def initialize(argv)
+    @force = false
+    @dirname = argv.pop or usage
+    @opts = {
+      uuid: SecureRandom.uuid,
+      title: File.basename @dirname,
+      tags: [],
+      topic: 'none',
+      type: 'v3',
+      force: false
+    }
   end
-  opts.delete(:force)
-  File.open(infojson, 'w') do |f|
-    f.puts JSON.pretty_generate(opts)
+  
+  def get_options
+    GetoptLong.new(
+      [['--force', '-f', GetoptLong::NO_ARGUMENT],
+       ['--title', '-n', GetoptLong::REQUIRED_ARGUMENT],
+       ['--tags', '-t',  GetoptLong::REQUIRED_ARGUMENT],
+       ['--topic', '-T',  GetoptLong::REQUIRED_ARGUMENT]]).each do |opt,arg|
+      case opt
+      when '--help' then usage
+      when '--force' then @force = true
+      when '--topic' then @opts[:topic] = arg
+      when '--tags' then @opts[:tags] = arg.split(/\s*,\s*/)
+      when '--title' then @opts[:title] = arg
+      end
+    end
+  end
+
+  def run
+    FileUtils.makedirs(@dirname) unless Dir.exist?(@dirname)
+    infojson = File.join(dirname, 'info.json')
+    if File.exist?(infojson) && !@force
+      STDERR.puts "#{@dirname}/info.json exists, use --force or -f to overwrite"
+      exit false
+    end
+    File.open(infojson, 'w') do |f|
+      f.puts JSON.pretty_generate(opts)
+    end
   end
 end
-  
-main()
+
+PlNew.new(ARGV).run()
