@@ -17,10 +17,6 @@ eos1
   exit false
 end
 
-def get_options
-  
-                          
-
 def main
   dirname = ARGV.pop || usage
   opts = {
