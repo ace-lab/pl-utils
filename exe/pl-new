@@ -7,12 +7,15 @@ require 'fileutils'
 
 def usage
   STDERR.puts <<eos1
-Usage: #{File.basename $0} [--topic=topic] [--tags=tag1,tag2] [--title=title] [--force] questiondir
-   or #{File.basename $0} [-T topic] [-t tag1,tag2] [-n title] [-f] questiondir
+Usage: #{File.basename $0} [--topic=topic] [--tags=tag1,tag2] [--title=title] [--clone=dir] [--force] questiondir
+   or #{File.basename $0} [-T topic] [-t tag1,tag2] [-n title] [-c dir] [-f] questiondir
 
 Create questiondir/info.json (--force means overwrite if exists) with a random uuid,
 the given topic (default="none"), the given tags (default=no tags), and the given question
 title (defaults to same as last pathname component of questiondir).
+
+If --clone or -c is specified, the values from the named directory's info.json are copied
+(except the UUID) and then selectively overridden by any additional arguments.
 eos1
   exit false
 end
@@ -22,30 +25,40 @@ class PlNew
     @force = false
     @dirname = argv.pop or usage
     @opts = {
-      uuid: SecureRandom.uuid,
-      title: File.basename(@dirname),
-      tags: [],
-      topic: 'none',
-      type: 'v3',
-      force: false
+      'uuid' => SecureRandom.uuid,
+      'title' => File.basename(@dirname),
+      'tags' => [],
+      'topic' => nil,
+      'type' => 'v3'
     }
   end
   
   def get_options
+    clone = nil
+    opts = {}
     GetoptLong.new(
       ['--force', '-f', GetoptLong::NO_ARGUMENT],
       ['--title', '-n', GetoptLong::REQUIRED_ARGUMENT],
       ['--tags', '-t',  GetoptLong::REQUIRED_ARGUMENT],
+      ['--clone', '-c', GetoptLong::REQUIRED_ARGUMENT],
       ['--topic', '-T',  GetoptLong::REQUIRED_ARGUMENT]).
       each do |opt,arg|
       case opt
       when '--help' then usage
       when '--force' then @force = true
-      when '--topic' then @opts[:topic] = arg
-      when '--tags' then @opts[:tags] = arg.split(/\s*,\s*/)
-      when '--title' then @opts[:title] = arg
-      end
+      when '--topic' then opts['topic'] = arg
+      when '--tags' then opts['tags'] = arg.split(/\s*,\s*/)
+      when '--title' then opts['title'] = arg
+      when '--clone' then clone = File.join(arg, 'info.json')
+      end      
     end
+    if clone
+      @opts = JSON.parse(File.read clone).merge(opts)
+    else
+      @opts = opts
+    end
+    # always overwrite uuid
+    @opts['uuid'] = SecureRandom.uuid
   end
 
   def run
